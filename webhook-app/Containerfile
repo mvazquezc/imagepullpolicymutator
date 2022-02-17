@@ -1,0 +1,16 @@
+FROM docker.io/library/golang:1.16.8
+ENV GO111MODULE on
+ENV CGO_ENABLED 0
+ENV GOOS linux
+
+WORKDIR /go/src/github.com/mvazquezc/k8s-mutate-webhook
+ADD . .
+# Get dependencies
+RUN go get -v ./...
+RUN go build -v -o pullpolicymutator cmd/main.go
+
+
+FROM scratch
+COPY --from=0 /go/src/github.com/mvazquezc/k8s-mutate-webhook/pullpolicymutator .
+EXPOSE 8443
+CMD ["/pullpolicymutator"]

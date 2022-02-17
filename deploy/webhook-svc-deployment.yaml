@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: pod-imagepull-wh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: wh-imagepullpolicy-serving-cert
+  name: wh-imagepullpolicy
+  namespace: pod-imagepull-wh
+  labels:
+    app: wh-imagepullpolicy
+spec:
+  ports:
+    - port: 443
+      targetPort: 8443
+  selector:
+    app: wh-imagepullpolicy
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wh-imagepullpolicy
+  namespace: pod-imagepull-wh
+  labels:
+    app: wh-imagepullpolicy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wh-imagepullpolicy
+  template:
+    metadata:
+      name: wh-imagepullpolicy
+      labels:
+        app: wh-imagepullpolicy
+    spec:
+      containers:
+        - name: webhook
+          image: quay.io/mavazque/pullpolicymutator:latest
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8443
+              scheme: HTTPS
+          volumeMounts:
+          - mountPath: ssl/
+            name: serving-cert
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 250m
+              memory: 64Mi
+      volumes:
+      - name: serving-cert
+        secret:
+          defaultMode: 420
+          secretName: wh-imagepullpolicy-serving-cert

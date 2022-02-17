@@ -1,0 +1,30 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: wh-imagepullpolicy
+  labels:
+    app: wh-imagepullpolicy
+webhooks:
+  - name: wh-imagepullpolicy.svc.cluster.local
+    admissionReviewVersions: ["v1", "v1beta1"]
+    clientConfig:
+      caBundle: changeme
+      service:
+        name: wh-imagepullpolicy
+        namespace: pod-imagepull-wh
+        path: "/mutate"
+        port: 443
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    sideEffects: None
+    timeoutSeconds: 5
+    reinvocationPolicy: Never
+    failurePolicy: Fail
+    namespaceSelector:
+      matchExpressions:
+        - {key: pullpolicymutator, operator: In, values: ["yes"]}
+
