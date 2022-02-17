@@ -45,7 +45,7 @@ func Mutate(body []byte, verbose bool) ([]byte, error) {
 
 		// add some audit annotations, helpful to know why a object was modified, maybe (?)
 		resp.AuditAnnotations = map[string]string{
-			"removedResourceRequestsAndLimits": "true",
+			"mutatedImagePullPolicy": "true",
 		}
 
 		// the actual mutation is done by a string in JSONPatch style, i.e. we don't _actually_ modify the object, but
