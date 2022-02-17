@@ -64,9 +64,9 @@ func Mutate(body []byte, verbose bool) ([]byte, error) {
 					"path":  fmt.Sprintf("/spec/containers/%d/imagePullPolicy", i),
 					"value": "IfNotPresent",
 				}
+				p = append(p, patch)
 			}
 
-			p = append(p, patch)
 		}
 		// parse the []map into JSON
 		resp.Patch, err = json.Marshal(p)
